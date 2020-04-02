@@ -1,0 +1,54 @@
+{
+  "name": "@ekoindia/aeps-gateway-lib",
+  "version": "0.2.0",
+  "description": "A small Javascript library to easily integrate Eko's AePS Gateway solution into a website and enable Cash-Out",
+  "main": "build/aeps-gateway-lib.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development",
+    "test": "jest",
+    "prepare": "npm run build",
+    "trypublish": "npm publish || true",
+    "check-updates": "npm outdated --depth=0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ekostore/aeps-gateway-lib"
+  },
+  "author": "Kumar Abhishek (https://github.com/manustays)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ekostore/aeps-gateway-lib/issues"
+  },
+  "homepage": "https://github.com/ekostore/aeps-gateway-lib",
+  "keywords": [
+    "aeps",
+    "cashout",
+    "eko",
+    "library",
+    "es6",
+    "umd"
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.9.0",
+    "babel-loader": "^8.1.0",
+    "babel-preset-minify": "^0.5.0",
+    "file-loader": "^6.0.0",
+    "jest": "^25.2.4",
+    "prettier": "^2.0.1",
+    "prettier-webpack-plugin": "^1.2.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {},
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/scripts/testMock.js",
+      "\\.(css|less)$": "<rootDir>/scripts/testMock.js"
+    }
+  }
+}
