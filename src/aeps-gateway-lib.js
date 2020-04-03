@@ -7,20 +7,20 @@ class EkoAEPSGateway {
 
 	constructor() {
 
-		console.log("Library constructor loaded");
+		console.log('Library constructor loaded');
 
-		const _GATEWAY_URL = 'https://gateway.eko.in';
-		const _UAT_GATEWAY_URL = 'https://stagegateway.eko.in';
+		this._GATEWAY_URL = 'https://gateway.eko.in';
+		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in';
 
 		this._config = {
-			// "developer_key": "",
-			// "secret_key": "",
-			// "secret_key_timestamp": "",
-			// "initiator_id": "",
-			// "user_code": "",
-			// "initiator_logo_url": "",
-			// "partner_name": "",
-			"language": "en"
+			// developer_key: '',
+			// secret_key: '',
+			// secret_key_timestamp: '',
+			// initiator_id: '',
+			// user_code: '',
+			// initiator_logo_url: '',
+			// partner_name: '',
+			language: 'en'
 		};
 
 		this._callbackUserFunc = null;
@@ -28,16 +28,20 @@ class EkoAEPSGateway {
 	}
 
 
-	_confirmationCallback = (e) => {
+	/**
+	 * Internal callback function
+	 * @param {*} e Event
+	 */
+	_confirmationCallback(e) {
 
 		if (this._callbackUserFunc &&
 			e &&
 			(e.origin === this._GATEWAY_URL || e.origin === this._UAT_GATEWAY_URL) &&
-			e.data && e.data.action === "debit-hook") {
+			e.data && e.data.action === 'debit-hook') {
 
 			this._callbackUserFunc(e.data);
 		}
-	};
+	}
 
 
 	/**
@@ -55,6 +59,7 @@ class EkoAEPSGateway {
 	 * @param {string} options.user_code - Unique code of your user/merchant availing AePS.
 	 * 		This needs to be generated while onboarding users.
 	 * 		(See: https://developers.eko.in/reference#activate-service)
+	 * @param {string} options.env - Envoirnment = "development" or "production"
 	 * @param {string} [options.language="en"] - AePS popup interface language:
 	 * 	- en: English (default)
 	 * 	- hi: Hindi
@@ -71,14 +76,15 @@ class EkoAEPSGateway {
 	 * 		"developer_key": "becbbce45f79c6f5109f848acd540567",
 	 * 		"secret_key": "dCUujUywtuu86CyoHkZZzBjLUAVC365e6PLaa4UYwqM=",
 	 * 		"secret_key_timestamp": "1532582133692",
-	 * 		"user_code": "20810200"
+	 * 		"user_code": "20810200",
+	 * 		"env": "production"
 	 * 	});
 	 */
-	config = (options) => {
+	config(options) {
 		if (options) {
 			this._config = Object.assign(this._config, options);
 		}
-	};
+	}
 
 
 	/**
@@ -111,20 +117,21 @@ class EkoAEPSGateway {
 	 * 		}
 	 * 	);
 	 */
-	setCallbackURL = (url, options) => {
-
-		options = options || {};
+	setCallbackURL(url, options) {
 
 		if (url) {
+			/* eslint camelcase: "off" */
 			this._config.callback_url = url;
-			if (options.parameters && typeof options.parameters === "object") {
+
+			if (options && options.parameters && typeof options.parameters === 'object') {
 				this._config.callback_url_custom_params = JSON.stringify(options.parameters);
 			}
-			if (options.headers && typeof options.headers === "object") {
+
+			if (options && options.headers && typeof options.headers === 'object') {
 				this._config.callback_url_custom_headers = JSON.stringify(options.headers);
 			}
 		}
-	};
+	}
 
 
 	/**
@@ -140,13 +147,13 @@ class EkoAEPSGateway {
 	 *
 	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
 	 */
-	setConfirmationCallbackFunction = (callbackFunc) => {
+	setConfirmationCallbackFunction(callbackFunc) {
 
 		if (callbackFunc) {
 			this._callbackUserFunc = callbackFunc;
 			window.addEventListener('message', this._confirmationCallback.bind(this));
 		}
-	};
+	}
 
 
 	/**
@@ -154,20 +161,21 @@ class EkoAEPSGateway {
 	 * use this function to send the transaction confirmation back to AePS Gateway.
 	 *
 	 * @param {Object} data Confirmation details
-	 * @param {string} data.secret_key
-	 * @param {string} data.secret_key_timestamp
-	 * @param {string} data.request_hash
+	 * @param {string} data.secret_key - Secret-key for security generated at your server.
+	 * 		(see https://developers.eko.in/docs/authentication)
+	 * @param {string} data.secret_key_timestamp - Timestamp used to generate the secret-key
+	 * @param {string} data.request_hash - (See https://developers.eko.in/docs/authentication)
 	 * @param {string} [data.client_ref_id] Optional unique ID for this transaction.
 	 */
-	confirmTransaction = (data) => {
+	confirmTransaction(data) {
 
 		data = data || {};
-		data.action = "go";
+		data.action = 'go';
 		data.allow = true;
 		if (this._popupWindow) {
 			this._popupWindow.postMessage(data, '*');
 		}
-	};
+	}
 
 
 	/**
@@ -176,39 +184,40 @@ class EkoAEPSGateway {
 	 *
 	 * @param {string} message Reason for rejection to show on the AePS popup window.
 	 */
-	rejectTransaction = (message) => {
+	rejectTransaction(message) {
 
 		const data = {
-			action: "go",
+			action: 'go',
 			allow: false,
-			message: message || ""
+			message: message || ''
 		};
 
 		if (this._popupWindow) {
 			this._popupWindow.postMessage(data, '*');
 		}
-	};
+	}
 
 
 	/**
 	 * Open the AePS Gateway popup window
 	 */
-	open = () => {
+	open() {
 
-		console.log("[EkoAEPSGateway] opening popup");
+		console.log('[EkoAEPSGateway] opening popup');
 
-		if (this._popupWindow == null || this._popupWindow.closed) {
+		if (this._popupWindow === null || this._popupWindow.closed) {
 
-			const form = document.createElement("form");
+			const url = this._config.env === 'production' ? this._GATEWAY_URL : this._UAT_GATEWAY_URL;
+			const form = document.createElement('form');
 			form.setAttribute('method', 'post');
 			form.setAttribute('action', url);
 			form.setAttribute('target', 'ekogateway');
-			this._popupWindow = window.open("", "ekogateway");
+			this._popupWindow = window.open('', 'ekogateway');
 
 			for (const prop in this._config) {
 
-				if (this._config.hasOwnProperty(prop)) {
-					var input = document.createElement('input');
+				if (Object.prototype.hasOwnProperty.call(this._config, prop)) {
+					const input = document.createElement('input');
 					input.type = 'hidden';
 					input.name = prop;
 					input.value = this._config[prop];
@@ -225,7 +234,7 @@ class EkoAEPSGateway {
 
 			this._popupWindow.focus();
 		}
-	};
+	}
 }
 
 

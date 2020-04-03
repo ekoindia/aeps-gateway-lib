@@ -7,9 +7,8 @@ const {
 	version,
 	name,
 	license,
-	repository,
-	author,
-} = getPackageJson('version', 'name', 'license', 'repository', 'author');
+	repository
+} = getPackageJson('version', 'name', 'license', 'repository');
 
 const banner = `${name} v${version}\n${repository.url}\n\n@copyright Eko (https://eko.in)\n@license ${license} found in the LICENSE file in the root directory.`;
 
@@ -26,9 +25,19 @@ module.exports = {
 	module: {
 		rules: [
 			{
+				enforce: 'pre',
+				test: /\.js$/,
+				exclude: /node_modules/,
+				loader: 'eslint-loader',
+				options: {
+					failOnError: true,
+					failOnWarning: false
+				},
+			},
+			{
 				test: /\.m?js$/,
-				exclude: /(node_modules|bower_components)/,
-				use: { loader: 'babel-loader' }
+				exclude: /(node_modules)/,
+				use: { loader: 'babel-loader' },
 			}
 		]
 	},
