@@ -6,8 +6,13 @@
 class EkoAEPSGateway {
 
 	constructor() {
+
 		console.log("Library constructor loaded");
-		this.config = {
+
+		const _GATEWAY_URL = 'https://gateway.eko.in';
+		const _UAT_GATEWAY_URL = 'https://stagegateway.eko.in';
+
+		this._config = {
 			// "developer_key": "",
 			// "secret_key": "",
 			// "secret_key_timestamp": "",
@@ -17,7 +22,22 @@ class EkoAEPSGateway {
 			// "partner_name": "",
 			"language": "en"
 		};
+
+		this._callbackUserFunc = null;
+		this._popupWindow = null;
 	}
+
+
+	_confirmationCallback = (e) => {
+
+		if (this._callbackUserFunc &&
+			e &&
+			(e.origin === this._GATEWAY_URL || e.origin === this._UAT_GATEWAY_URL) &&
+			e.data && e.data.action === "debit-hook") {
+
+			this._callbackUserFunc(e.data);
+		}
+	};
 
 
 	/**
@@ -56,7 +76,7 @@ class EkoAEPSGateway {
 	 */
 	config = (options) => {
 		if (options) {
-			this.config = Object.assign(this.config, options);
+			this._config = Object.assign(this._config, options);
 		}
 	};
 
@@ -65,7 +85,7 @@ class EkoAEPSGateway {
 	 * Setup your server's callback URL for confirming transactions.
 	 *  - It is essential for security.
 	 *  - You can also handle the callback yourself in Javascript by
-	 *    using _setCallbackFunction()_ (_not recommended_)
+	 *    using _setConfirmationCallbackFunction()_ (_not recommended_)
 	 *
 	 * @param {string} url - Your server URL to call for getting final transaction confirmation.
 	 * @param {Object} [options] - Optional callback setting two properties: "parameters" and "headers" that we should set before calling your callback-URL.
@@ -73,30 +93,37 @@ class EkoAEPSGateway {
 	 * @param {Object[]} options.headers - An array of HTTP request headers that we should add with the callback requets
 	 *
 	 * @example
+	 * // Simple callback with no extra parameters or headers:
 	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm");
 	 *
 	 * @example
+	 * // Callback with extra body parameter "session_key":
 	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
 	 * 		{
-	 * 			parameters: [
-	 * 				{ "session_key": "gsRS56sj4$6sdn67sHGs8j" }
-	 * 			]
+	 * 			parameters: { "session_key": "gsRS56sj4$6sdn67sHGs8j" }
 	 * 		}
 	 * 	);
 	 *
 	 * @example
 	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
 	 * 		{
-	 * 			headers: [
-	 * 				{ "authorization": "Bearer gsRS56sj4$6sdn67sHGs8j" }
-	 * 			]
+	 * 			headers: { "authorization": "Bearer gsRS56sj4$6sdn67sHGs8j" }
 	 * 		}
 	 * 	);
 	 */
 	setCallbackURL = (url, options) => {
 
-		// TODO
-		return;
+		options = options || {};
+
+		if (url) {
+			this._config.callback_url = url;
+			if (options.parameters && typeof options.parameters === "object") {
+				this._config.callback_url_custom_params = JSON.stringify(options.parameters);
+			}
+			if (options.headers && typeof options.headers === "object") {
+				this._config.callback_url_custom_headers = JSON.stringify(options.headers);
+			}
+		}
 	};
 
 
@@ -113,10 +140,53 @@ class EkoAEPSGateway {
 	 *
 	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
 	 */
-	setCallbackFunction = (callbackFunc) => {
+	setConfirmationCallbackFunction = (callbackFunc) => {
 
-		// TODO
-		return;
+		if (callbackFunc) {
+			this._callbackUserFunc = callbackFunc;
+			window.addEventListener('message', this._confirmationCallback.bind(this));
+		}
+	};
+
+
+	/**
+	 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
+	 * use this function to send the transaction confirmation back to AePS Gateway.
+	 *
+	 * @param {Object} data Confirmation details
+	 * @param {string} data.secret_key
+	 * @param {string} data.secret_key_timestamp
+	 * @param {string} data.request_hash
+	 * @param {string} [data.client_ref_id] Optional unique ID for this transaction.
+	 */
+	confirmTransaction = (data) => {
+
+		data = data || {};
+		data.action = "go";
+		data.allow = true;
+		if (this._popupWindow) {
+			this._popupWindow.postMessage(data, '*');
+		}
+	};
+
+
+	/**
+	 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
+	 * 	use this function to send the transaction confirmation back to AePS Gateway.
+	 *
+	 * @param {string} message Reason for rejection to show on the AePS popup window.
+	 */
+	rejectTransaction = (message) => {
+
+		const data = {
+			action: "go",
+			allow: false,
+			message: message || ""
+		};
+
+		if (this._popupWindow) {
+			this._popupWindow.postMessage(data, '*');
+		}
 	};
 
 
@@ -124,31 +194,39 @@ class EkoAEPSGateway {
 	 * Open the AePS Gateway popup window
 	 */
 	open = () => {
-		console.log("[EkoAEPSGateway] open");
 
-		var url = 'https://stagegateway.eko.in/v2/aeps';
-		var form = document.createElement("form");
-		form.setAttribute('method', 'post');
-		form.setAttribute('action', url);
-		form.setAttribute('target', 'ekogateway');
-		popup = window.open("", "ekogateway");
+		console.log("[EkoAEPSGateway] opening popup");
 
-		for (const prop in this.config) {
+		if (this._popupWindow == null || this._popupWindow.closed) {
 
-			if (this.config.hasOwnProperty(prop)) {
-				var input = document.createElement('input');
-				input.type = 'hidden';
-				input.name = prop;
-				input.value = this.config[prop];
-				form.appendChild(input);
+			const form = document.createElement("form");
+			form.setAttribute('method', 'post');
+			form.setAttribute('action', url);
+			form.setAttribute('target', 'ekogateway');
+			this._popupWindow = window.open("", "ekogateway");
+
+			for (const prop in this._config) {
+
+				if (this._config.hasOwnProperty(prop)) {
+					var input = document.createElement('input');
+					input.type = 'hidden';
+					input.name = prop;
+					input.value = this._config[prop];
+					form.appendChild(input);
+				}
+
 			}
 
-		}
+			document.body.appendChild(form);
+			form.submit();
+			document.body.removeChild(form);
 
-		document.body.appendChild(form);
-		form.submit();
-		document.body.removeChild(form);
+		} else {
+
+			this._popupWindow.focus();
+		}
 	};
 }
+
 
 export default EkoAEPSGateway;
