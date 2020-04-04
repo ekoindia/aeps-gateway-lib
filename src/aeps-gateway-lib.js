@@ -29,7 +29,7 @@ class EkoAEPSGateway {
 
 
 	/**
-	 * Internal callback function
+	 * Internal callback function for communicating with the popup window
 	 * @param {*} e Event
 	 */
 	_confirmationCallback(e) {

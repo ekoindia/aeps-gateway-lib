@@ -1,7 +1,7 @@
 {
   "name": "@ekoindia/aeps-gateway-lib",
   "version": "1.1.0",
-  "description": "A small Javascript library to integrate Eko's AePS Gateway solution into a website and enable Cash-Out",
+  "description": "A small Javascript library to integrate Eko's AePS Gateway solution into any website to enable Cash-Out",
   "main": "build/aeps-gateway-lib.js",
   "scripts": {
     "build": "webpack --mode production",
