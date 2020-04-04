@@ -1,17 +1,48 @@
 /**
  * Helper library to launch Eko's AePS gateway from a webpage
  *
+ * @example
+ *
+ * <script type="javascript" src="../dist/aeps-gateway-lib.js" />
+ *
+ * EkoAEPSGateway.config({...});
+ * EkoAEPSGateway.setCallbackURL({...});
+ * EkoAEPSGateway.open();
+ *
+ *
  * @author Kumar Abhishek (https://github.com/manustays)
  */
 class EkoAEPSGateway {
 
+	/**
+	 * Constructor
+	 * @ignore
+	 */
 	constructor() {
 
-		console.log('Library constructor loaded');
+		console.debug('Library constructor loaded');
 
+		/**
+		 * The production URL for AePS gateway.
+		 * @readonly
+		 * @private
+		 * @ignore
+		 */
 		this._GATEWAY_URL = 'https://gateway.eko.in';
+
+		/**
+		 * The development URL for AePS gateway for testing.
+		 * @readonly
+		 * @private
+		 * @ignore
+		 */
 		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in';
 
+		/**
+		 * Internal configuration store.
+		 * @private
+		 * @ignore
+		 */
 		this._config = {
 			// developer_key: '',
 			// secret_key: '',
@@ -20,17 +51,32 @@ class EkoAEPSGateway {
 			// user_code: '',
 			// initiator_logo_url: '',
 			// partner_name: '',
+			env: 'development',
 			language: 'en'
 		};
 
+
+		/**
+		 * Internal store for user's callback function for transaction confirmation.
+		 * @private
+		 * @ignore
+		 */
 		this._callbackUserFunc = null;
+
+		/**
+		 * Internal store for handle to the popup window.
+		 * @private
+		 * @ignore
+		 */
 		this._popupWindow = null;
 	}
 
 
 	/**
+	 * @private
+	 * @ignore
 	 * Internal callback function for communicating with the popup window
-	 * @param {*} e Event
+	 * @param {*} e Window message event
 	 */
 	_confirmationCallback(e) {
 
@@ -59,7 +105,7 @@ class EkoAEPSGateway {
 	 * @param {string} options.user_code - Unique code of your user/merchant availing AePS.
 	 * 		This needs to be generated while onboarding users.
 	 * 		(See: https://developers.eko.in/reference#activate-service)
-	 * @param {string} options.env - Envoirnment = "development" or "production"
+	 * @param {string} options.env - Envoirnment = "development" _(default)_ or "production"
 	 * @param {string} [options.language="en"] - AePS popup interface language:
 	 * 	- en: English (default)
 	 * 	- hi: Hindi
@@ -138,6 +184,7 @@ class EkoAEPSGateway {
 	 * @callback confirmationCallback
 	 * @param {Object} requestData
 	 * @return {Object}
+	 * @todo Document callback request and returned response
 	 */
 
 	/**
@@ -169,11 +216,11 @@ class EkoAEPSGateway {
 	 */
 	confirmTransaction(data) {
 
-		data = data || {};
-		data.action = 'go';
-		data.allow = true;
+		const response_data = data || {};
+		response_data.action = 'go';
+		response_data.allow = true;
 		if (this._popupWindow) {
-			this._popupWindow.postMessage(data, '*');
+			this._popupWindow.postMessage(response_data, '*');
 		}
 	}
 
@@ -202,12 +249,13 @@ class EkoAEPSGateway {
 	 * Open the AePS Gateway popup window
 	 */
 	open() {
-
-		console.log('[EkoAEPSGateway] opening popup');
+		console.debug('[EkoAEPSGateway] opening popup');
 
 		if (this._popupWindow === null || this._popupWindow.closed) {
+			const url = this._config.env === 'production' || this._config.env === 'prod' ?
+				this._GATEWAY_URL :
+				this._UAT_GATEWAY_URL;
 
-			const url = this._config.env === 'production' ? this._GATEWAY_URL : this._UAT_GATEWAY_URL;
 			const form = document.createElement('form');
 			form.setAttribute('method', 'post');
 			form.setAttribute('action', url);
@@ -215,7 +263,6 @@ class EkoAEPSGateway {
 			this._popupWindow = window.open('', 'ekogateway');
 
 			for (const prop in this._config) {
-
 				if (Object.prototype.hasOwnProperty.call(this._config, prop)) {
 					const input = document.createElement('input');
 					input.type = 'hidden';
@@ -223,15 +270,12 @@ class EkoAEPSGateway {
 					input.value = this._config[prop];
 					form.appendChild(input);
 				}
-
 			}
 
 			document.body.appendChild(form);
 			form.submit();
 			document.body.removeChild(form);
-
 		} else {
-
 			this._popupWindow.focus();
 		}
 	}

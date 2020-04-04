@@ -3,7 +3,9 @@ module.exports = {
     ["@babel/env"],
     ["minify", {
 	  "keepFnName": true,
-	  "removeConsole": true,
+	  "removeConsole": {
+		  "exclude": ["error", "warn"]
+	  },
 	  "removeDebugger": true
     }]
   ],
