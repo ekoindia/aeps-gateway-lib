@@ -12,7 +12,7 @@
  *
  * @author Kumar Abhishek (https://github.com/manustays)
  */
-class EkoAEPSGateway {
+export default class EkoAEPSGateway {
 
 	/**
 	 * Constructor
@@ -20,7 +20,7 @@ class EkoAEPSGateway {
 	 */
 	constructor() {
 
-		console.debug('Library constructor loaded');
+		console.debug('Library constructor loaded:: ', { win: window, doc: document, body: document.body });
 
 		/**
 		 * The production URL for AePS gateway.
@@ -28,7 +28,7 @@ class EkoAEPSGateway {
 		 * @private
 		 * @ignore
 		 */
-		this._GATEWAY_URL = 'https://gateway.eko.in';
+		this._GATEWAY_URL = 'https://gateway.eko.in/v2/aeps';
 
 		/**
 		 * The development URL for AePS gateway for testing.
@@ -36,7 +36,7 @@ class EkoAEPSGateway {
 		 * @private
 		 * @ignore
 		 */
-		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in';
+		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in/v2/aeps';
 
 		/**
 		 * Internal configuration store.
@@ -256,7 +256,7 @@ class EkoAEPSGateway {
 				this._GATEWAY_URL :
 				this._UAT_GATEWAY_URL;
 
-			const form = document.createElement('form');
+			let form = document.createElement('form');
 			form.setAttribute('method', 'post');
 			form.setAttribute('action', url);
 			form.setAttribute('target', 'ekogateway');
@@ -274,12 +274,9 @@ class EkoAEPSGateway {
 
 			document.body.appendChild(form);
 			form.submit();
-			document.body.removeChild(form);
+			// document.body.removeChild(form);
 		} else {
 			this._popupWindow.focus();
 		}
 	}
 }
-
-
-export default EkoAEPSGateway;

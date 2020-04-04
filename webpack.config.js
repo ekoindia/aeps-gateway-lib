@@ -22,6 +22,10 @@ module.exports = {
 		library: 'EkoAEPSGateway',
 		libraryTarget: 'umd'
 	},
+	devServer: {
+		contentBase: path.join(__dirname),
+		port: 9000
+	},
 	module: {
 		rules: [
 			{

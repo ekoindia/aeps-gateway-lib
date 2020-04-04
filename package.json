@@ -7,6 +7,7 @@
     "build": "webpack --mode production",
     "dev": "webpack --mode development",
     "test": "jest",
+    "start": "webpack-dev-server",
     "prepare": "npm run build",
     "trypublish": "npm publish || true",
     "check-updates": "npm outdated --depth=0"
@@ -44,7 +45,8 @@
     "prettier": "^2.0.1",
     "prettier-webpack-plugin": "^1.2.0",
     "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {},
   "jest": {
