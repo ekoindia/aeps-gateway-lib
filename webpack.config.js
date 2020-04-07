@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 // const PrettierPlugin = require("prettier-webpack-plugin");
 const getPackageJson = require('./scripts/getPackageJson');
+const WebpackBar = require('webpackbar');
 
 const {
 	version,
@@ -21,10 +22,6 @@ module.exports = {
 		path: path.resolve(__dirname, 'build'),
 		library: 'EkoAEPSGateway',
 		libraryTarget: 'umd'
-	},
-	devServer: {
-		contentBase: path.join(__dirname),
-		port: 9000
 	},
 	module: {
 		rules: [
@@ -47,6 +44,7 @@ module.exports = {
 	},
 	plugins: [
 		// new PrettierPlugin(),
-		new webpack.BannerPlugin(banner)
+		new webpack.BannerPlugin(banner),
+		new WebpackBar()
 	]
 };

@@ -1,16 +1,16 @@
 {
   "name": "@ekoindia/aeps-gateway-lib",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A small Javascript library to integrate Eko's AePS Gateway solution into any website to enable Cash-Out",
   "main": "build/aeps-gateway-lib.js",
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development",
     "test": "jest",
-    "start": "webpack-dev-server",
     "prepare": "npm run build",
     "trypublish": "npm publish || true",
-    "check-updates": "npm outdated --depth=0"
+	"check-updates": "npm outdated --depth=0",
+	"publish": "npm publish --access=public"
   },
   "repository": {
     "type": "git",
@@ -26,8 +26,7 @@
     "aeps",
     "cashout",
     "eko",
-    "library",
-    "es6",
+    "javascript-library",
     "umd"
   ],
   "devDependencies": {
@@ -46,7 +45,7 @@
     "prettier-webpack-plugin": "^1.2.0",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3"
+    "webpackbar": "^4.0.0"
   },
   "dependencies": {},
   "jest": {
