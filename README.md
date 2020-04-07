@@ -13,7 +13,7 @@ Javascript library to easily integrate Eko's AePS Gateway solution into a websit
 
 ### Include Library
 ```html
-<script src="node_modules/ekoindia/aeps-gateway-lib.js"></script>
+<script src="node_modules/@ekoindia/aeps-gateway-lib.js"></script>
 ```
 
 ### Setup AePS on page load
