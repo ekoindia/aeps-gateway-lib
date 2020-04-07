@@ -7,6 +7,7 @@
 
 # docs
 /docs
+/example
 
 # misc
 .DS_Store
@@ -30,5 +31,9 @@ config
 .travis.yml
 CHANGELOG.md
 README.md
+CODE_OF_CONDUCT.md
+LICENSE
 webpack.config.js
 babel.config.js
+.eslintrc.*
+.gitignore
