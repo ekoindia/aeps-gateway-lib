@@ -8,9 +8,8 @@
     "dev": "webpack --mode development",
     "test": "jest",
     "prepare": "npm run build",
-    "trypublish": "npm publish || true",
-    "check-updates": "npm outdated --depth=0",
-    "publish": "npm publish --access=public"
+    "trypublish": "npm publish --access=public || true",
+    "check-updates": "npm outdated --depth=0"
   },
   "repository": {
     "type": "git",
