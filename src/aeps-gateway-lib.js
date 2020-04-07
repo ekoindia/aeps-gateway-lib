@@ -38,6 +38,16 @@ export default class EkoAEPSGateway {
 		 */
 		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in/v2/aeps';
 
+
+		/**
+		 * Array of Gateway origins
+		 * @readonly
+		 * @private
+		 * @ignore
+		 */
+		this._GATEWAY_ORIGINS = [ 'http://localhost:3004', 'https://testgateway.eko.in', 'https://stagegateway.eko.in', 'https://gateway.eko.in' ];
+
+
 		/**
 		 * Internal configuration store.
 		 * @private
@@ -63,6 +73,14 @@ export default class EkoAEPSGateway {
 		 */
 		this._callbackUserFunc = null;
 
+
+		/**
+		 * Internal store for user's callback function for transaction final response.
+		 * @private
+		 * @ignore
+		 */
+		this._responseCallbackUserFunc = null;
+
 		/**
 		 * Internal store for handle to the popup window.
 		 * @private
@@ -82,11 +100,20 @@ export default class EkoAEPSGateway {
 
 		if (this._callbackUserFunc &&
 			e &&
-			(e.origin === this._GATEWAY_URL || e.origin === this._UAT_GATEWAY_URL) &&
-			e.data && e.data.action === 'debit-hook') {
-
-			this._callbackUserFunc(e.data);
+			this._GATEWAY_ORIGINS.indexOf(e.origin) >= 0 &&
+			e.data &&
+			e.data.eko_gateway_response && e.data.eko_gateway_response.action === 'debit-hook') {
+			this._callbackUserFunc(e.data.eko_gateway_response);
 		}
+
+		if (this._responseCallbackUserFunc &&
+			e &&
+			this._GATEWAY_ORIGINS.indexOf(e.origin) >= 0 &&
+			e.data && e.data.eko_gateway_response &&
+			e.data.eko_gateway_response.action === 'response') {
+			this._responseCallbackUserFunc(e.data.eko_gateway_response);
+		}
+
 	}
 
 
@@ -204,6 +231,20 @@ export default class EkoAEPSGateway {
 
 
 	/**
+	 * Setup your Javascript callback function for getting final response of transactions.
+	 *  - It is an _alternative_ to setCallbackURL()
+	 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
+	 *
+	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
+	 */
+	setResponseCallbackFunction(callbackFunc) {
+		if (callbackFunc) {
+			this._responseCallbackUserFunc = callbackFunc;
+		}
+	}
+
+
+	/**
 	 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
 	 * use this function to send the transaction confirmation back to AePS Gateway.
 	 *
@@ -220,7 +261,7 @@ export default class EkoAEPSGateway {
 		response_data.action = 'go';
 		response_data.allow = true;
 		if (this._popupWindow) {
-			this._popupWindow.postMessage(response_data, '*');
+			this._popupWindow.postMessage({ eko_gateway_request : response_data }, '*');
 		}
 	}
 
