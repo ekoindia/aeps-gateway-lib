@@ -1,5 +1,5 @@
 /*!
- * @ekoindia/aeps-gateway-lib v1.2.2
+ * @ekoindia/aeps-gateway-lib v1.3.0
  * https://github.com/ekostore/aeps-gateway-lib
  * 
  * @copyright Eko (https://eko.in)
