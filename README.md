@@ -19,7 +19,7 @@ Javascript library to easily integrate Eko's AePS Gateway solution into a websit
 ### Setup AePS on page load
 ```html
 <script>
-var aeps = new EkoAEPSGateway.default();
+var aeps = new EkoAEPSGateway();
 
 // Configure your developer API details...
 aeps.config({
@@ -32,10 +32,13 @@ aeps.config({
 	"user_code": "20810200",
 	"env": "development"
 });
+
+// Configure callback URL for transaction-confirmation and for getting final result...
+aeps.setCallbackURL('https://example.com/aeps/callback');
 </script>
 ```
 
-### Open AePS Popup whenever needed (ex: ona button click)
+### Open AePS Popup whenever needed (ex: on a button click)
 ```javascript
 aeps.open();
 ```

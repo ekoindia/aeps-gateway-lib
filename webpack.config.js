@@ -21,6 +21,7 @@ module.exports = {
 		filename: 'aeps-gateway-lib.js',
 		path: path.resolve(__dirname, 'build'),
 		library: 'EkoAEPSGateway',
+		libraryExport: 'default',
 		libraryTarget: 'umd'
 	},
 	module: {
