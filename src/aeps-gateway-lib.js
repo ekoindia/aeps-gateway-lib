@@ -23,21 +23,16 @@ export default class EkoAEPSGateway {
 		console.debug('Library constructor loaded:: ', { win: window, doc: document, body: document.body });
 
 		/**
-		 * The production URL for AePS gateway.
+		 * AePS gateway URL list for multiple environment
 		 * @readonly
 		 * @private
 		 * @ignore
 		 */
-		this._GATEWAY_URL = 'https://gateway.eko.in/v2/aeps';
-
-		/**
-		 * The development URL for AePS gateway for testing.
-		 * @readonly
-		 * @private
-		 * @ignore
-		 */
-		this._UAT_GATEWAY_URL = 'https://stagegateway.eko.in/v2/aeps';
-
+		this._GATEWAY_URL_LIST = {
+			local: 'http://localhost:3004/v2/aeps',
+			development: 'https://stagegateway.eko.in/v2/aeps',
+			production: 'https://gateway.eko.in/v2/aeps'
+		};
 
 		/**
 		 * Array of Gateway origins
@@ -87,6 +82,9 @@ export default class EkoAEPSGateway {
 		 * @ignore
 		 */
 		this._popupWindow = null;
+
+		window.addEventListener('message', this._confirmationCallback.bind(this));
+
 	}
 
 
@@ -218,15 +216,23 @@ export default class EkoAEPSGateway {
 	 * Setup your Javascript callback function for confirming transactions.
 	 *  - It is an _alternative_ to setCallbackURL()
 	 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
-	 *
+	 * @returns {Boolean} - Returns true when callbackFunc is set else returns false
 	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
 	 */
-	setConfirmationCallbackFunction(callbackFunc) {
+	setConfirmationCallbackFunction(callbackFunc) {	
 
 		if (callbackFunc) {
-			this._callbackUserFunc = callbackFunc;
-			window.addEventListener('message', this._confirmationCallback.bind(this));
+
+			if (this._config.callback_url) {
+				console.error('Failed to set confirm callback function with callBack URL');
+			} else {
+				this._callbackUserFunc = callbackFunc;
+				return true;
+			}
 		}
+
+		return false;
+
 	}
 
 
@@ -234,13 +240,16 @@ export default class EkoAEPSGateway {
 	 * Setup your Javascript callback function for getting final response of transactions.
 	 *  - It is an _alternative_ to setCallbackURL()
 	 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
-	 *
+	 * @returns {Boolean} - Returns true when callbackFunc is set else returns false
 	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
 	 */
 	setResponseCallbackFunction(callbackFunc) {
+
 		if (callbackFunc) {
 			this._responseCallbackUserFunc = callbackFunc;
+			return true;
 		}
+		return false;
 	}
 
 
@@ -292,32 +301,33 @@ export default class EkoAEPSGateway {
 	open() {
 		console.debug('[EkoAEPSGateway] opening popup');
 
-		if (this._popupWindow === null || this._popupWindow.closed) {
-			const url = this._config.env === 'production' || this._config.env === 'prod' ?
-				this._GATEWAY_URL :
-				this._UAT_GATEWAY_URL;
+		let url = '';
 
-			let form = document.createElement('form');
-			form.setAttribute('method', 'post');
-			form.setAttribute('action', url);
-			form.setAttribute('target', 'ekogateway');
-			this._popupWindow = window.open('', 'ekogateway');
-
-			for (const prop in this._config) {
-				if (Object.prototype.hasOwnProperty.call(this._config, prop)) {
-					const input = document.createElement('input');
-					input.type = 'hidden';
-					input.name = prop;
-					input.value = this._config[prop];
-					form.appendChild(input);
-				}
-			}
-
-			document.body.appendChild(form);
-			form.submit();
-			// document.body.removeChild(form);
+		if (this._config.env && this._GATEWAY_URL_LIST[this._config.env]) {
+			url = this._GATEWAY_URL_LIST[this._config.env];
 		} else {
-			this._popupWindow.focus();
+			url = this._GATEWAY_URL_LIST.development;
 		}
+
+		let form = document.createElement('form');
+		form.setAttribute('method', 'post');
+		form.setAttribute('action', url);
+		form.setAttribute('target', 'ekogateway');
+		this._popupWindow = window.open('', 'ekogateway');
+
+		for (const prop in this._config) {
+			if (Object.prototype.hasOwnProperty.call(this._config, prop)) {
+				const input = document.createElement('input');
+				input.type = 'hidden';
+				input.name = prop;
+				input.value = this._config[prop];
+				form.appendChild(input);
+			}
+		}
+
+		document.body.appendChild(form);
+		form.submit();
+		document.body.removeChild(form);
+		
 	}
 }
