@@ -1,38 +1,16 @@
 <html>
 	<head>
-		<style>
-			.configuration input {
-				height: 30px;
-				width: 400px;
-				border: 1px solid #cccccc;
-				font-size: 20px;
-				padding: 2px;
-			}
-		</style>
 		<script src="../build/aeps-gateway-lib.js"></script>
 	</head>
+	
 	<body>
 		<H2>AePS Gateway</H2>
 
 		<hr>
+		
 		<div class="middle-section">
-			<button onclick="doAeps()" class="btn"> Pay using Aadhaar Card (AePS) </button>
+			<button onClick="doAeps()">Cashout using Aadhaar Card (AePS)</button>
 		</div>
-
-		<div class="configuration">
-			<br>
-			Balance <span id="merchant_balance"></span>
-			<!-- <br><br>
-			User Code <input type="text" id="usercode" value="20310001"> <br> <br>
-			Initiator Id <input type="text" id="initiator-id" value="7411111111"> <br> <br> -->
-
-		</div>
-
-		<h1>
-			Message Event Received Data
-		</h1>
-		<div id="messages-received" style="max-width: 800px;"></div>
-
 
 		<script>
 			var aeps = new EkoAEPSGateway();
