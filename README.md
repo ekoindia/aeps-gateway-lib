@@ -11,12 +11,12 @@ Javascript library to easily integrate Eko's AePS Gateway solution into a websit
 
 ## Usage
 
-### Include Library
+### 1. Include Library
 ```html
 <script src="node_modules/@ekoindia/aeps-gateway-lib.js"></script>
 ```
 
-### Setup AePS on page load
+### 2. Setup AePS on page load
 ```html
 <script>
 var aeps = new EkoAEPSGateway();
@@ -38,7 +38,10 @@ aeps.setCallbackURL('https://example.com/aeps/callback');
 </script>
 ```
 
-### Open AePS Popup whenever needed (ex: on a button click)
+### 3. Open AePS Popup whenever needed (ex: on a button click)
 ```javascript
 aeps.open();
 ```
+
+## Code Examples
+1. [Basic Example](https://github.com/ekoindia/aeps-gateway-lib/blob/master/example/basic_example.html)
