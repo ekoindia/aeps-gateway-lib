@@ -2,6 +2,9 @@
 Javascript library to easily integrate Eko's AePS Gateway solution into a website
 
 [![GitHub issues](https://img.shields.io/github/issues/ekoindia/aeps-gateway-lib)](https://github.com/ekoindia/aeps-gateway-lib/issues)  [![npm (scoped)](https://img.shields.io/npm/v/@ekoindia/aeps-gateway-lib)](https://github.com/ekoindia/aeps-gateway-lib)  [![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/@ekoindia/aeps-gateway-lib)](https://github.com/ekoindia/aeps-gateway-lib)  [![GitHub license](https://img.shields.io/github/license/ekoindia/aeps-gateway-lib)](https://github.com/ekoindia/aeps-gateway-lib/blob/master/LICENSE)
+<a href="https://twitter.com/intent/follow?screen_name=ekospeaks">
+        <img src="https://img.shields.io/twitter/follow/ekospeaks?style=social&logo=twitter"
+            alt="follow on Twitter"></a>
 
 ---
 
