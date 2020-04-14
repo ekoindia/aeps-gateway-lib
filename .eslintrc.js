@@ -1,3 +1,4 @@
+const pkg = require('./package.json');
 const OFF = 0, WARN = 1, ERROR = 2;
 
 module.exports = exports = {
@@ -118,7 +119,7 @@ module.exports = exports = {
 		"no-undef-init": OFF,
 		"no-undef": ERROR,
 		"no-undefined": OFF,
-		"no-unused-vars": WARN,
+		"no-unused-vars": [WARN, { vars: "local", varsIgnorePattern: pkg.moduleVar }],
 		// Disallow hoisting - let & const don't allow hoisting anyhow
 		"no-use-before-define": ERROR,
 
@@ -164,7 +165,7 @@ module.exports = exports = {
 		"consistent-this": [WARN, "self"],
 		"eol-last": WARN,
 		"func-names": OFF,
-		"func-style": [WARN, "declaration"],
+		"func-style": OFF, // [WARN, "declaration"],
 		"id-length": [WARN, { "min": 2, "max": 32, "exceptions": ["e"] }],
 		"indent": [WARN, "tab"],
 		"jsx-quotes": [WARN, "prefer-double"],

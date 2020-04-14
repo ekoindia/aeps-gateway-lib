@@ -14,7 +14,6 @@
  *
  * @author Kumar Abhishek (https://github.com/manustays)
  */
-// export default class EkoAEPSGateway {
 var EkoAEPSGateway = (function () {
 
 	/**
@@ -30,6 +29,7 @@ var EkoAEPSGateway = (function () {
 	};
 
 	/**
+	 * Helper variable to produce a smaller build
 	 * @readonly
 	 * @private
 	 * @ignore
@@ -124,18 +124,21 @@ var EkoAEPSGateway = (function () {
 
 
 	/**
+	 * Helper variable to produce a smaller build
 	 * @private
 	 * @ignore
 	 */
 	var win = window;
 
 	/**
+	 * Helper variable to produce a smaller build
 	 * @private
 	 * @ignore
 	 */
 	var doc = document;
 
 	/**
+	 * Helper variable to produce a smaller build
 	 * @private
 	 * @ignore
 	 */
@@ -151,7 +154,7 @@ var EkoAEPSGateway = (function () {
 	 * @private
 	 * @ignore
 	 */
-	var TAG = "EkoAePS";
+	var TAG = 'EkoAePS';
 
 
 	return function () {
@@ -353,6 +356,7 @@ var EkoAEPSGateway = (function () {
 			_popupWindow = win.open('', TAG);
 			_popupWindow.pm = _popupWindow.postMessage;	// For smaller build
 
+			/* eslint guard-for-in: "off" */
 			for (prop in _config) {
 				input = doc_create('input');
 				input.type = 'hidden';

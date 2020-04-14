@@ -2,8 +2,10 @@
   "name": "@ekoindia/aeps-gateway-lib",
   "version": "1.3.0",
   "description": "A small Javascript library to integrate Eko's AePS Gateway solution into any website to enable Cash-Out",
+  "browser": "build/aeps-gateway-lib.js",
   "main": "build/aeps-gateway-lib.js",
   "module": "src/aeps-gateway-lib.js",
+  "moduleVar": "EkoAEPSGateway",
   "scripts": {
     "build": "gulp build",
     "test": "jest",
@@ -15,7 +17,13 @@
     "type": "git",
     "url": "https://github.com/ekostore/aeps-gateway-lib"
   },
+  "files": [
+	"build/aeps-gateway-lib.js"
+  ],
   "author": "Kumar Abhishek (https://github.com/manustays)",
+  "contributors": [
+	"Himanshi Gupta (https://github.com/himanshigupta29)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ekostore/aeps-gateway-lib/issues"
@@ -27,6 +35,9 @@
     "eko",
     "javascript-library"
   ],
+  "publishConfig": {
+	"access": "public"
+  },
   "devDependencies": {
     "del": "^5.1.0",
     "gulp": "^4.0.2",
