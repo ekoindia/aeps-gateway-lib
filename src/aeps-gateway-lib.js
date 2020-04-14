@@ -1,6 +1,8 @@
 /**
  * Helper library to launch Eko's AePS gateway from a webpage
  *
+ * Written in ES5 to get a smaller build
+ *
  * @example
  *
  * <script type="javascript" src="../dist/aeps-gateway-lib.js" />
@@ -12,80 +14,76 @@
  *
  * @author Kumar Abhishek (https://github.com/manustays)
  */
-export default class EkoAEPSGateway {
+var EkoAEPSGateway = (function () {
 
 	/**
-	 * Constructor
+	 * AePS Gateway URL list for multiple environments
+	 * @readonly
+	 * @private
 	 * @ignore
 	 */
-	constructor() {
+	var _GATEWAY_URL_LIST = {
+		local: 'http://localhost:3004',
+		development: 'https://stagegateway.eko.in',
+		production: 'https://gateway.eko.in'
+	};
 
-		console.debug('Library constructor');
+	/**
+	 * Helper variable to produce a smaller build
+	 * @readonly
+	 * @private
+	 * @ignore
+	 */
+	var _DEFAULT_ENV = 'development';
 
-		/**
-		 * AePS Gateway URL list for multiple environments
-		 * @readonly
-		 * @private
-		 * @ignore
-		 */
-		this._GATEWAY_URL_LIST = {
-			local: 			'http://localhost:3004',
-			development: 	'https://stagegateway.eko.in',
-			production: 	'https://gateway.eko.in'
-		};
-
-		/**
-		 * AePS Gateway URL path
-		 * @readonly
-		 * @private
-		 * @ignore
-		 */
-		this._GATEWAY_URL_PATH = '/v2/aeps';
+	/**
+	 * AePS Gateway URL path
+	 * @readonly
+	 * @private
+	 * @ignore
+	 */
+	var _GATEWAY_URL_PATH = '/v2/aeps';
 
 
-		/**
-		 * Internal configuration store.
-		 * @private
-		 * @ignore
-		 */
-		this._config = {
-			// developer_key: '',
-			// secret_key: '',
-			// secret_key_timestamp: '',
-			// initiator_id: '',
-			// user_code: '',
-			// initiator_logo_url: '',
-			// partner_name: '',
-			env: 'development',
-			language: 'en'
-		};
+	/**
+	 * Internal configuration store.
+	 * @private
+	 * @ignore
+	 */
+	var _config = {
+		// developer_key: '',
+		// secret_key: '',
+		// secret_key_timestamp: '',
+		// initiator_id: '',
+		// user_code: '',
+		// initiator_logo_url: '',
+		// partner_name: '',
+		// language: 'en',
+		env: _DEFAULT_ENV
+	};
 
 
-		/**
-		 * Internal store for user's callback function for transaction confirmation.
-		 * @private
-		 * @ignore
-		 */
-		this._callbackUserFunc = null;
+	/**
+	 * Internal store for user's callback function for transaction confirmation.
+	 * @private
+	 * @ignore
+	 */
+	var _callbackUserFunc = null;
 
 
-		/**
-		 * Internal store for user's callback function for transaction final response.
-		 * @private
-		 * @ignore
-		 */
-		this._responseCallbackUserFunc = null;
+	/**
+	 * Internal store for user's callback function for transaction final response.
+	 * @private
+	 * @ignore
+	 */
+	var _responseCallbackUserFunc = null;
 
-		/**
-		 * Internal store for handle to the popup window.
-		 * @private
-		 * @ignore
-		 */
-		this._popupWindow = null;
-
-		window.addEventListener('message', this._gatewayMessageListener.bind(this));
-
-	}
+	/**
+	 * Internal store for handle to the popup window.
+	 * @private
+	 * @ignore
+	 */
+	var _popupWindow = null;
 
 
 	/**
@@ -94,229 +92,285 @@ export default class EkoAEPSGateway {
 	 * Internal callback function for communicating with the popup window
 	 * @param {*} e Window message event
 	 */
-	_gatewayMessageListener(e) {
-
-		const valid_origin = this._GATEWAY_URL_LIST[this._config.env || 'development'];
-
+	var _gatewayMessageListener = function (e) {
+		var resp = null;
 		if (e &&
-			e.origin === valid_origin &&
-			e.data &&
-			e.data.eko_gateway_response) {
+			e.origin === _GATEWAY_URL_LIST[_config.env || _DEFAULT_ENV] &&
+			e.data) {
 
-			if (this._callbackUserFunc && e.data.eko_gateway_response.action === 'debit-hook') {
-				this._callbackUserFunc(e.data.eko_gateway_response);
-			} else if (this._responseCallbackUserFunc && e.data.eko_gateway_response.action === 'response') {
-				this._responseCallbackUserFunc(e.data.eko_gateway_response);
+			resp = e.data.eko_gateway_response;
+			if (resp) {
+				if (_callbackUserFunc && resp.action === 'debit-hook') {
+					_callbackUserFunc(resp);
+				} else if (_responseCallbackUserFunc && resp.action === 'response') {
+					_responseCallbackUserFunc(resp);
+				}
 			}
 		}
-	}
+	};
 
 
 	/**
-	 * Configure API credentials and other options.
-	 * API details at: https://developers.eko.in/docs/aeps-gateway
-	 *
-	 * @param {Object} options - An object with all options to set.
-	 * @param {string} options.partner_name - Your company name to display in the AePS popup.
-	 * @param {string} options.initiator_logo_url - Your company logo to display in the AePS popup
-	 * @param {string} options.initiator_id - Your registered initiator-id.
-	 * @param {string} options.developer_key - Your Eko API developer-key.
-	 * @param {string} options.secret_key - Secret-key for security generated at your server.
-	 * 		(see: https://developers.eko.in/docs/authentication)
-	 * @param {string} options.secret_key_timestamp - Timestamp used to generate secret-key.
-	 * @param {string} options.user_code - Unique code of your user/merchant availing AePS.
-	 * 		This needs to be generated while onboarding users.
-	 * 		(See: https://developers.eko.in/reference#activate-service)
-	 * @param {string} options.env - Envoirnment = "development" _(default)_ or "production"
-	 * @param {string} [options.language="en"] - AePS popup interface language:
-	 * 	- en: English (default)
-	 * 	- hi: Hindi
-	 * 	- mr: Marathi
-	 * 	- gu: Gujarati
-	 * 	- kn: Kannada
-	 * 	- ta: Tamil
-	 *
-	 * @example
-	 * EkoAEPSGateway.config({
-	 * 		"partner_name": "Payments INC",
-	 * 		"initiator_logo_url": "https://files.eko.co.in/docs/logos/payment/dummy-partner-logo.png",
-	 * 		"initiator_id": "9962981729",
-	 * 		"developer_key": "becbbce45f79c6f5109f848acd540567",
-	 * 		"secret_key": "dCUujUywtuu86CyoHkZZzBjLUAVC365e6PLaa4UYwqM=",
-	 * 		"secret_key_timestamp": "1532582133692",
-	 * 		"user_code": "20810200",
-	 * 		"env": "production"
-	 * 	});
+	 * @private
+	 * @ignore
+	 * Internal helper function to check for valid object and return serialized form
+	 * @param {Object} obj Main object
+	 * @param {string} prop Property to serialize
+	 * @returns {String} Serialized 'prop'
 	 */
-	config(options) {
-		if (options) {
-			this._config = Object.assign(this._config, options);
-		}
-	}
+	var _getValidObjectString = function (obj, prop) {
+		return obj && obj[prop] && typeof obj[prop] === 'object' ? JSON.stringify(obj[prop]) : undefined;
+	};
 
 
 	/**
-	 * Setup your server's callback URL for confirming transactions and for getting final response.
-	 *  - It is essential for security.
-	 *  - You can also handle the callback yourself in Javascript by
-	 *    using _setConfirmationCallbackFunction()_ (_not recommended_)
-	 *
-	 * @param {string} url - Your server URL to call for getting final transaction confirmation.
-	 * @param {Object} [options] - Optional callback setting two properties: "parameters" and "headers" that we should set before calling your callback-URL.
-	 * @param {Object[]} options.parameters - An array of parameters with values that we should add with the callback requets
-	 * @param {Object[]} options.headers - An array of HTTP request headers that we should add with the callback requets
-	 *
-	 * @example
-	 * // Simple callback with no extra parameters or headers:
-	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm");
-	 *
-	 * @example
-	 * // Callback with extra body parameter "session_key":
-	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
-	 * 		{
-	 * 			parameters: { "session_key": "gsRS56sj4$6sdn67sHGs8j" }
-	 * 		}
-	 * 	);
-	 *
-	 * @example
-	 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
-	 * 		{
-	 * 			headers: { "authorization": "Bearer gsRS56sj4$6sdn67sHGs8j" }
-	 * 		}
-	 * 	);
+	 * Helper variable to produce a smaller build
+	 * @private
+	 * @ignore
 	 */
-	setCallbackURL(url, options) {
+	var win = window;
 
-		if (url) {
-			/* eslint camelcase: "off" */
-			this._config.callback_url = url;
+	/**
+	 * Helper variable to produce a smaller build
+	 * @private
+	 * @ignore
+	 */
+	var doc = document;
 
-			if (options && options.parameters && typeof options.parameters === 'object') {
-				this._config.callback_url_custom_params = JSON.stringify(options.parameters);
+	/**
+	 * Helper variable to produce a smaller build
+	 * @private
+	 * @ignore
+	 */
+	var doc_body = doc.body;
+
+	/**
+	 * @private
+	 * @ignore
+	 */
+	var doc_create = doc.createElement;
+
+	/**
+	 * @private
+	 * @ignore
+	 */
+	var TAG = 'EkoAePS';
+
+
+	return function () {
+
+		console.debug('[EkoAEPSGateway] constructor called');
+
+
+		win.addEventListener('message', _gatewayMessageListener.bind(this));
+
+
+		/**
+		 * Configure API credentials and other options.
+		 * API details at: https://developers.eko.in/docs/aeps-gateway
+		 *
+		 * @param {Object} options - An object with all options to set.
+		 * @param {string} options.partner_name - Your company name to display in the AePS popup.
+		 * @param {string} options.initiator_logo_url - Your company logo to display in the AePS popup
+		 * @param {string} options.initiator_id - Your registered initiator-id.
+		 * @param {string} options.developer_key - Your Eko API developer-key.
+		 * @param {string} options.secret_key - Secret-key for security generated at your server.
+		 * 		(see: https://developers.eko.in/docs/authentication)
+		 * @param {string} options.secret_key_timestamp - Timestamp used to generate secret-key.
+		 * @param {string} options.user_code - Unique code of your user/merchant availing AePS.
+		 * 		This needs to be generated while onboarding users.
+		 * 		(See: https://developers.eko.in/reference#activate-service)
+		 * @param {string} options.env - Envoirnment = "development" _(default)_ or "production"
+		 * @param {string} [options.language="en"] - AePS popup interface language:
+		 * 	- en: English (default)
+		 * 	- hi: Hindi
+		 * 	- mr: Marathi
+		 * 	- gu: Gujarati
+		 * 	- kn: Kannada
+		 * 	- ta: Tamil
+		 *
+		 * @example
+		 * EkoAEPSGateway.config({
+		 * 		"partner_name": "Payments INC",
+		 * 		"initiator_logo_url": "https://files.eko.co.in/docs/logos/payment/dummy-partner-logo.png",
+		 * 		"initiator_id": "9962981729",
+		 * 		"developer_key": "becbbce45f79c6f5109f848acd540567",
+		 * 		"secret_key": "dCUujUywtuu86CyoHkZZzBjLUAVC365e6PLaa4UYwqM=",
+		 * 		"secret_key_timestamp": "1532582133692",
+		 * 		"user_code": "20810200",
+		 * 		"env": "production"
+		 * 	});
+		 */
+		this.config = function (options) {
+			if (options) {
+				_config = Object.assign(_config, options);
 			}
-
-			if (options && options.headers && typeof options.headers === 'object') {
-				this._config.callback_url_custom_headers = JSON.stringify(options.headers);
-			}
-		}
-	}
-
-
-	/**
-	 * @callback confirmationCallback
-	 * @param {Object} requestData
-	 * @returns {Object}
-	 * @todo Document callback request and returned response
-	 */
-
-	/**
-	 * Setup your Javascript callback function for confirming transactions.
-	 *  - It is an _alternative_ to setCallbackURL()
-	 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
-	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
-	 * @returns {Boolean} - Returns true on success else false
-	 */
-	setConfirmationCallbackFunction(callbackFunc) {
-
-		if (callbackFunc) {
-
-			if (this._config.callback_url) {
-				console.error('Failed to set callback function. CallBack URL already set.');
-			} else {
-				this._callbackUserFunc = callbackFunc;
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-
-	/**
-	 * Setup your Javascript callback function for getting final response of transactions.
-	 *  - It is an _alternative_ to setCallbackURL()
-	 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
-	 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
-	 * @returns {Boolean} - Returns true on success else false
-	 */
-	setResponseCallbackFunction(callbackFunc) {
-
-		if (callbackFunc) {
-			this._responseCallbackUserFunc = callbackFunc;
-			return true;
-		}
-		return false;
-	}
-
-
-	/**
-	 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
-	 * use this function to send the transaction confirmation back to AePS Gateway.
-	 *
-	 * @param {Object} data Confirmation details
-	 * @param {string} data.secret_key - Secret-key for security generated at your server.
-	 * 		(see https://developers.eko.in/docs/authentication)
-	 * @param {string} data.secret_key_timestamp - Timestamp used to generate the secret-key
-	 * @param {string} data.request_hash - (See https://developers.eko.in/docs/authentication)
-	 * @param {string} [data.client_ref_id] Optional unique ID for this transaction.
-	 */
-	confirmTransaction(data) {
-
-		const response_data = data || {};
-		response_data.action = 'go';
-		response_data.allow = true;
-		if (this._popupWindow) {
-			this._popupWindow.postMessage({ eko_gateway_request : response_data }, '*');
-		}
-	}
-
-
-	/**
-	 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
-	 * 	use this function to send the transaction confirmation back to AePS Gateway.
-	 *
-	 * @param {string} message Reason for rejection to show on the AePS popup window.
-	 */
-	rejectTransaction(message) {
-
-		const data = {
-			action: 'go',
-			allow: false,
-			message: message || ''
 		};
 
-		if (this._popupWindow) {
-			this._popupWindow.postMessage(data, '*');
-		}
-	}
+
+		/**
+		 * Setup your server's callback URL for confirming transactions and for getting final response.
+		 *  - It is essential for security.
+		 *  - You can also handle the callback yourself in Javascript by
+		 *    using _setConfirmationCallbackFunction()_ (_not recommended_)
+		 *
+		 * @param {string} url - Your server URL to call for getting final transaction confirmation.
+		 * @param {Object} [options] - Optional callback setting two properties: "parameters" and "headers" that we should set before calling your callback-URL.
+		 * @param {Object[]} options.parameters - An array of parameters with values that we should add with the callback requets
+		 * @param {Object[]} options.headers - An array of HTTP request headers that we should add with the callback requets
+		 *
+		 * @example
+		 * // Simple callback with no extra parameters or headers:
+		 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm");
+		 *
+		 * @example
+		 * // Callback with extra body parameter "session_key":
+		 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
+		 * 		{
+		 * 			parameters: { "session_key": "gsRS56sj4$6sdn67sHGs8j" }
+		 * 		}
+		 * 	);
+		 *
+		 * @example
+		 * EkoAEPSGateway.setCallbackURL("https://myserver.com/ekoaeps/confirm",
+		 * 		{
+		 * 			headers: { "authorization": "Bearer gsRS56sj4$6sdn67sHGs8j" }
+		 * 		}
+		 * 	);
+		 */
+		this.setCallbackURL = function (url, options) {
+
+			if (url) {
+				/* eslint camelcase: "off" */
+				_config.callback_url = url;
+				_config.callback_url_custom_params = _getValidObjectString(options, 'parameters');
+				_config.callback_url_custom_headers = _getValidObjectString(options, 'headers');
+			}
+		};
 
 
-	/**
-	 * Open the AePS Gateway popup window
-	 */
-	open() {
-		console.debug('[EkoAEPSGateway] opening popup');
+		/**
+		 * @callback confirmationCallback
+		 * @param {Object} requestData
+		 * @returns {Object}
+		 * @todo Document callback request and returned response
+		 */
 
-		const url = (this._GATEWAY_URL_LIST[this._config.env] || this._GATEWAY_URL_LIST.development) + this._GATEWAY_URL_PATH;
+		/**
+		 * Setup your Javascript callback function for confirming transactions.
+		 *  - It is an _alternative_ to setCallbackURL()
+		 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
+		 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
+		 * @returns {Boolean} - Returns true on success else false
+		 */
+		this.setConfirmationCallbackFunction = function (callbackFunc) {
 
-		const form = document.createElement('form');
-		form.setAttribute('method', 'post');
-		form.setAttribute('action', url);
-		form.setAttribute('target', 'ekogateway');
-		this._popupWindow = window.open('', 'ekogateway');
+			if (callbackFunc) {
 
-		for (const prop in this._config) {
-			if (Object.prototype.hasOwnProperty.call(this._config, prop)) {
-				const input = document.createElement('input');
+				if (_config.callback_url) {
+					console.error(TAG, 'Callback URL already set');
+				} else {
+					_callbackUserFunc = callbackFunc;
+					return true;
+				}
+			}
+
+			return false;
+		};
+
+
+		/**
+		 * Setup your Javascript callback function for getting final response of transactions.
+		 *  - It is an _alternative_ to setCallbackURL()
+		 * @see setCallbackURL - It is _**recommended to use setCallbackURL()**_ instead
+		 * @param {confirmationCallback} callbackFunc The callback function to handle confirmation of the final AePS Transaction
+		 * @returns {Boolean} - Returns true on success else false
+		 */
+		this.setResponseCallbackFunction = function (callbackFunc) {
+
+			if (callbackFunc) {
+				_responseCallbackUserFunc = callbackFunc;
+				return true;
+			}
+			return false;
+		};
+
+
+		/**
+		 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
+		 * use this function to send the transaction confirmation back to AePS Gateway.
+		 *
+		 * @param {Object} data Confirmation details
+		 * @param {string} data.secret_key - Secret-key for security generated at your server.
+		 * 		(see https://developers.eko.in/docs/authentication)
+		 * @param {string} data.secret_key_timestamp - Timestamp used to generate the secret-key
+		 * @param {string} data.request_hash - (See https://developers.eko.in/docs/authentication)
+		 * @param {string} [data.client_ref_id] Optional unique ID for this transaction.
+		 */
+		this.confirmTransaction = function (data) {
+
+			var response_data = data || {};
+			response_data.action = 'go';
+			response_data.allow = true;
+			if (_popupWindow) {
+				_popupWindow.pm({ eko_gateway_request: response_data }, '*');
+			}
+		};
+
+
+		/**
+		 * If using the confirmation callback function (with _setConfirmationCallbackFunction()_),
+		 * 	use this function to send the transaction confirmation back to AePS Gateway.
+		 *
+		 * @param {string} message Reason for rejection to show on the AePS popup window.
+		 */
+		this.rejectTransaction = function (message) {
+
+			var data = {
+				action: 'go',
+				allow: false,
+				message: message || ''
+			};
+
+			if (_popupWindow) {
+				_popupWindow.pm(data, '*');
+			}
+		};
+
+
+		/**
+		 * Open the AePS Gateway popup window
+		 */
+		this.open = function () {
+
+			var url = (_GATEWAY_URL_LIST[_config.env] || _GATEWAY_URL_LIST[_DEFAULT_ENV]) + _GATEWAY_URL_PATH;
+			var form = doc_create('form');
+			var form_set_attr = form.setAttribute;
+			var prop = null, input = null;
+
+			console.debug('[EkoAEPSGateway] opening popup');
+
+			form_set_attr('method', 'post');
+			form_set_attr('action', url);
+			form_set_attr('target', TAG);
+			_popupWindow = win.open('', TAG);
+			_popupWindow.pm = _popupWindow.postMessage;	// For smaller build
+
+			/* eslint guard-for-in: "off" */
+			for (prop in _config) {
+				input = doc_create('input');
 				input.type = 'hidden';
 				input.name = prop;
-				input.value = this._config[prop];
+				input.value = _config[prop];
 				form.appendChild(input);
 			}
-		}
 
-		document.body.appendChild(form);
-		form.submit();
-		document.body.removeChild(form);
-	}
-}
+			doc_body.appendChild(form);
+			form.submit();
+			doc_body.removeChild(form);
+		};
+
+
+	};
+
+})();

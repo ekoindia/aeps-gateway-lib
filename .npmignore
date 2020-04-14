@@ -37,3 +37,5 @@ webpack.config.js
 babel.config.js
 .eslintrc.*
 .gitignore
+gulpfile.js
+package-lock.json
