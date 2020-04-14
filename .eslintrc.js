@@ -3,10 +3,11 @@ const OFF = 0, WARN = 1, ERROR = 2;
 module.exports = exports = {
 	"env": {
 		"browser": true,
-		"es6": true
+		"es6": false,
 	},
 
 	"parserOptions": {
+		"ecmaVersion": 2015,
 		"sourceType": "module"
 	},
 
@@ -99,7 +100,7 @@ module.exports = exports = {
 		"radix": WARN,
 		"vars-on-top": ERROR,
 		// Enforces the style of wrapped functions
-		"wrap-iife": [ERROR, "outside"],
+		"wrap-iife": [ERROR, "inside"],
 		"yoda": ERROR,
 
 		// Strict Mode - for ES6, never use strict.
@@ -145,7 +146,7 @@ module.exports = exports = {
 		"no-const-assign": ERROR,
 		"no-dupe-class-members": ERROR,
 		"no-this-before-super": ERROR,
-		"no-var": WARN,
+		"no-var": OFF,
 		"object-shorthand": [WARN, "never"],
 		"prefer-arrow-callback": WARN,
 		"prefer-spread": WARN,
@@ -162,7 +163,7 @@ module.exports = exports = {
 		"computed-property-spacing": [WARN, "never"],
 		"consistent-this": [WARN, "self"],
 		"eol-last": WARN,
-		"func-names": WARN,
+		"func-names": OFF,
 		"func-style": [WARN, "declaration"],
 		"id-length": [WARN, { "min": 2, "max": 32, "exceptions": ["e"] }],
 		"indent": [WARN, "tab"],
@@ -209,7 +210,7 @@ module.exports = exports = {
 		"semi": [ERROR, "always"],
 		"sort-vars": OFF,
 		"space-before-blocks": [WARN, "always"],
-		"space-before-function-paren": [WARN, "never"],
+		"space-before-function-paren": [WARN, { "anonymous": "always", "named": "never"}],
 		"space-in-parens": [WARN, "never"],
 		"space-infix-ops": [WARN, { "int32Hint": true }],
 		"keyword-spacing": [ERROR, {"before": true, "after": true}],
