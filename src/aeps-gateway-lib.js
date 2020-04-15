@@ -24,7 +24,7 @@ var EkoAEPSGateway = (function (window, document) {
 	 */
 	var _GATEWAY_URL_LIST = {
 		local: 'http://localhost:3004',
-		development: 'https://stagegateway.eko.in',
+		uat: 'https://stagegateway.eko.in',
 		production: 'https://gateway.eko.in'
 	};
 
@@ -34,7 +34,7 @@ var EkoAEPSGateway = (function (window, document) {
 	 * @private
 	 * @ignore
 	 */
-	var _DEFAULT_ENV = 'development';
+	var _DEFAULT_ENV = 'production';
 
 	/**
 	 * AePS Gateway URL path
@@ -59,7 +59,7 @@ var EkoAEPSGateway = (function (window, document) {
 		// initiator_logo_url: '',
 		// partner_name: '',
 		// language: 'en',
-		env: _DEFAULT_ENV
+		environment: _DEFAULT_ENV
 	};
 
 
@@ -95,7 +95,7 @@ var EkoAEPSGateway = (function (window, document) {
 	var _gatewayMessageListener = function (e) {
 		var resp = null;
 		if (e &&
-			e.origin === _GATEWAY_URL_LIST[_config.env || _DEFAULT_ENV] &&
+			e.origin === _GATEWAY_URL_LIST[_config.environment || _DEFAULT_ENV] &&
 			e.data) {
 
 			resp = e.data.eko_gateway_response;
@@ -165,7 +165,7 @@ var EkoAEPSGateway = (function (window, document) {
 		 * @param {string} options.user_code - Unique code of your user/merchant availing AePS.
 		 * 		This needs to be generated while onboarding users.
 		 * 		(See: https://developers.eko.in/reference#activate-service)
-		 * @param {string} options.env - Envoirnment = "development" _(default)_ or "production"
+		 * @param {string} options.environment - Envoirnment = "uat" or "production" _(default)_
 		 * @param {string} [options.language="en"] - AePS popup interface language:
 		 * 	- en: English (default)
 		 * 	- hi: Hindi
@@ -183,7 +183,7 @@ var EkoAEPSGateway = (function (window, document) {
 		 * 		"secret_key": "dCUujUywtuu86CyoHkZZzBjLUAVC365e6PLaa4UYwqM=",
 		 * 		"secret_key_timestamp": "1532582133692",
 		 * 		"user_code": "20810200",
-		 * 		"env": "production"
+		 * 		"environment": "production"
 		 * 	});
 		 */
 		this.config = function (options) {
@@ -298,7 +298,7 @@ var EkoAEPSGateway = (function (window, document) {
 			response_data.action = 'go';
 			response_data.allow = true;
 			if (_popupWindow) {
-				_popupWindow.pm({ eko_gateway_request: response_data }, '*');
+				_popupWindow.postMessage({ eko_gateway_request: response_data }, '*');
 			}
 		};
 
@@ -318,7 +318,7 @@ var EkoAEPSGateway = (function (window, document) {
 			};
 
 			if (_popupWindow) {
-				_popupWindow.pm(data, '*');
+				_popupWindow.postMessage(data, '*');
 			}
 		};
 
@@ -328,7 +328,7 @@ var EkoAEPSGateway = (function (window, document) {
 		 */
 		this.open = function () {
 
-			var url = (_GATEWAY_URL_LIST[_config.env] || _GATEWAY_URL_LIST[_DEFAULT_ENV]) + _GATEWAY_URL_PATH;
+			var url = (_GATEWAY_URL_LIST[_config.environment] || _GATEWAY_URL_LIST[_DEFAULT_ENV]) + _GATEWAY_URL_PATH;
 			var form = doc_create('form');
 			var form_set_attr = form.setAttribute.bind(form);
 			var prop = null, input = null;
@@ -339,7 +339,9 @@ var EkoAEPSGateway = (function (window, document) {
 			form_set_attr('action', url);
 			form_set_attr('target', TAG);
 			_popupWindow = window.open('', TAG);
-			_popupWindow.pm = _popupWindow.postMessage.bind(window);	// For smaller build
+			// if (!_popupWindow.pm) {
+			// 	_popupWindow.pm = _popupWindow.postMessage.bind(window);	// For smaller build
+			// }
 
 			/* eslint guard-for-in: "off" */
 			for (prop in _config) {

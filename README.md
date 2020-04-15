@@ -31,7 +31,7 @@ aeps.config({
 	"secret_key": "y4aNr2cuSuaX2fCsfXMVopqvaZtx9MKHCcsF73fHxvc=",
 	"secret_key_timestamp": "1585999782835",
 	"user_code": "20810200",
-	"env": "development"
+	"environment": "uat"
 });
 
 // Configure callback URL for transaction-confirmation and for getting final result...
