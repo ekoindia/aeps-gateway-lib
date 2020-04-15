@@ -14,7 +14,7 @@
  *
  * @author Kumar Abhishek (https://github.com/manustays)
  */
-var EkoAEPSGateway = (function () {
+var EkoAEPSGateway = (function (window, document) {
 
 	/**
 	 * AePS Gateway URL list for multiple environments
@@ -122,33 +122,18 @@ var EkoAEPSGateway = (function () {
 		return obj && obj[prop] && typeof obj[prop] === 'object' ? JSON.stringify(obj[prop]) : undefined;
 	};
 
-
 	/**
 	 * Helper variable to produce a smaller build
 	 * @private
 	 * @ignore
 	 */
-	var win = window;
-
-	/**
-	 * Helper variable to produce a smaller build
-	 * @private
-	 * @ignore
-	 */
-	var doc = document;
-
-	/**
-	 * Helper variable to produce a smaller build
-	 * @private
-	 * @ignore
-	 */
-	var doc_body = doc.body;
+	// var doc_body = document.body;
 
 	/**
 	 * @private
 	 * @ignore
 	 */
-	var doc_create = doc.createElement;
+	var doc_create = document.createElement.bind(document);
 
 	/**
 	 * @private
@@ -162,7 +147,7 @@ var EkoAEPSGateway = (function () {
 		console.debug('[EkoAEPSGateway] constructor called');
 
 
-		win.addEventListener('message', _gatewayMessageListener.bind(this));
+		window.addEventListener('message', _gatewayMessageListener.bind(this));
 
 
 		/**
@@ -345,16 +330,16 @@ var EkoAEPSGateway = (function () {
 
 			var url = (_GATEWAY_URL_LIST[_config.env] || _GATEWAY_URL_LIST[_DEFAULT_ENV]) + _GATEWAY_URL_PATH;
 			var form = doc_create('form');
-			var form_set_attr = form.setAttribute;
+			var form_set_attr = form.setAttribute.bind(form);
 			var prop = null, input = null;
 
-			console.debug('[EkoAEPSGateway] opening popup');
+			console.debug('[EkoAEPSGateway] opening popup ', doc_create, typeof doc_create);
 
 			form_set_attr('method', 'post');
 			form_set_attr('action', url);
 			form_set_attr('target', TAG);
-			_popupWindow = win.open('', TAG);
-			_popupWindow.pm = _popupWindow.postMessage;	// For smaller build
+			_popupWindow = window.open('', TAG);
+			_popupWindow.pm = _popupWindow.postMessage.bind(window);	// For smaller build
 
 			/* eslint guard-for-in: "off" */
 			for (prop in _config) {
@@ -365,12 +350,12 @@ var EkoAEPSGateway = (function () {
 				form.appendChild(input);
 			}
 
-			doc_body.appendChild(form);
+			document.body.appendChild(form);
 			form.submit();
-			doc_body.removeChild(form);
+			document.body.removeChild(form);
 		};
 
 
 	};
 
-})();
+})(window,document);
