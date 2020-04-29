@@ -119,7 +119,7 @@ var EkoAEPSGateway = (function (window, document) {
 	 * @returns {String} Serialized 'prop'
 	 */
 	var _getValidObjectString = function (obj, prop) {
-		return obj && obj[prop] && typeof obj[prop] === 'object' ? JSON.stringify(obj[prop]) : undefined;
+		return JSON.stringify(obj && obj[prop] && typeof obj[prop] === 'object' ? obj[prop] : []);
 	};
 
 	/**
