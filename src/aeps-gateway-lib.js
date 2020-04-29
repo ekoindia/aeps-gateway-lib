@@ -360,4 +360,4 @@ var EkoAEPSGateway = (function (window, document) {
 
 	};
 
-})(window,document);
+})(window, document);
