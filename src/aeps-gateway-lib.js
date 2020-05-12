@@ -119,15 +119,8 @@ var EkoAEPSGateway = (function (window, document) {
 	 * @returns {String} Serialized 'prop'
 	 */
 	var _getValidObjectString = function (obj, prop) {
-		return JSON.stringify(obj && obj[prop] && typeof obj[prop] === 'object' ? obj[prop] : []);
+		return JSON.stringify(obj && obj[prop] && typeof obj[prop] === 'object' ? obj[prop] : {});
 	};
-
-	/**
-	 * Helper variable to produce a smaller build
-	 * @private
-	 * @ignore
-	 */
-	// var doc_body = document.body;
 
 	/**
 	 * @private
@@ -201,8 +194,8 @@ var EkoAEPSGateway = (function (window, document) {
 		 *
 		 * @param {string} url - Your server URL to call for getting final transaction confirmation.
 		 * @param {Object} [options] - Optional callback setting two properties: "parameters" and "headers" that we should set before calling your callback-URL.
-		 * @param {Object[]} options.parameters - An array of parameters with values that we should add with the callback requets
-		 * @param {Object[]} options.headers - An array of HTTP request headers that we should add with the callback requets
+		 * @param {Object} options.parameters - Additional parameters (as name-value pairs) that should be sent with the callback request.
+		 * @param {Object} options.headers - Additional HTTP request headers (as name-value pairs) that should be sent with the callback request.
 		 *
 		 * @example
 		 * // Simple callback with no extra parameters or headers:
