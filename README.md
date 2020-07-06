@@ -47,4 +47,4 @@ aeps.open();
 ```
 
 ## Code Examples
-1. [Basic Example](https://github.com/ekoindia/aeps-gateway-lib/blob/master/example/basic_example.html)
+1. [Basic Example](/example/basic_example.html)
