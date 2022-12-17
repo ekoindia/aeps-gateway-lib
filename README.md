@@ -22,18 +22,18 @@ Javascript library to easily integrate Eko's AePS Gateway solution into a websit
 ### 2. Setup AePS on page load
 ```html
 <script>
-var aeps = new EkoAEPSGateway();
+const aeps = new EkoAEPSGateway();
 
 // Configure your developer API details...
 aeps.config({
-	"partner_name": "Example Company INC",
-	"initiator_logo_url": "https://example.com/my-logo.png",
-	"initiator_id": "9962981729",
-	"developer_key": "becbbce45f79c6f5109f848acd540567",
-	"secret_key": "y4aNr2cuSuaX2fCsfXMVopqvaZtx9MKHCcsF73fHxvc=",
-	"secret_key_timestamp": "1585999782835",
-	"user_code": "20810200",
-	"environment": "uat"
+	partner_name: "Example Company INC",
+	initiator_logo_url: "https://example.com/my-logo.png",
+	initiator_id: "9962981729",
+	developer_key: "becbbce45f79c6f5109f848acd540567",
+	secret_key: "y4aNr2cuSuaX2fCsfXMVopqvaZtx9MKHCcsF73fHxvc=",
+	secret_key_timestamp: "1585999782835",
+	user_code: "20810200",
+	environment: "uat"
 });
 
 // Configure callback URL for transaction-confirmation and for getting final result...
